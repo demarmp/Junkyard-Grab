@@ -129,7 +129,7 @@ if st.button("Search Top Parts & Locations", type="primary"):
                     img_col, info_col = st.columns([1, 2])
                     with img_col:
                         if image_url:
-                            st.image(image_url, use_container_width=True)
+                            st.image(image_url)  # Clean render without deprecated argument conflicts
                     with info_col:
                         st.markdown(f"📍 **Location:** `{location}`")
                         c1, c2, c3, c4 = st.columns(4)
