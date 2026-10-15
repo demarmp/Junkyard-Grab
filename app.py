@@ -48,13 +48,12 @@ with st.form("add_part_form", clear_on_submit=True):
     submitted = st.form_submit_button("Calculate & Add to List", type="primary")
     if submitted:
         if part_name and vehicle:
-            # Automated fixed constants
             admission_fee = 1.00
             handling_fee = 0.94
             shipping_materials = 1.25
-            fixed_overhead = admission_fee + handling_fee + shipping_materials  # $3.19 total
+            fixed_overhead = admission_fee + handling_fee + shipping_materials  # $3.19
             
-            # Automated eBay fee formula (13.25% + $0.30)
+            # 13.25% + $0.30 per order fee
             ebay_fees = (list_price * 0.1325) + 0.30
             
             total_costs = yard_cost + ebay_fees + fixed_overhead
@@ -66,7 +65,7 @@ with st.form("add_part_form", clear_on_submit=True):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (part_name, vehicle, list_price, yard_cost, ebay_fees, fixed_overhead, net_profit, roi, "To Grab"))
             conn.commit()
-            st.success(f"Added **{part_name}**! Net Profit: **${net_profit:.2f}** ({roi:.1f}% ROI)")
+            st.success(f"Added **{part_name}**! Net Profit: **${net_profit:.2f}**")
             st.rerun()
         else:
             st.error("Please fill in the Part Name and Vehicle fields.")
@@ -76,7 +75,6 @@ st.markdown("---")
 # --- DASHBOARD & HAUL LIST ---
 st.subheader("🎯 Upcoming Weekend Haul List")
 
-# Safe schema check if upgrading from an older database version
 try:
     cursor.execute("SELECT id, part_name, vehicle, list_price, yard_cost, ebay_fees, fixed_fees, net_profit, roi, status FROM haul_list")
     rows = cursor.fetchall()
@@ -92,28 +90,31 @@ if rows:
     total_fixed_fees = sum(row[6] for row in rows)
     total_profit = sum(row[7] for row in rows)
     total_all_costs = total_yard_cost + total_ebay_fees + total_fixed_fees
-    overall_roi = (total_profit / total_all_costs * 100) if total_all_costs > 0 else 0.0
+    
+    yard_cash_roi = (total_profit / total_yard_cost * 100) if total_yard_cost > 0 else 0.0
+    overall_all_in_roi = (total_profit / total_all_costs * 100) if total_all_costs > 0 else 0.0
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Est. Revenue", f"${total_revenue:.2f}")
+    m1.metric("Est. Revenue", f"${total_revenue:.2f}")
     m2.metric("Total All-In Costs", f"${total_all_costs:.2f}")
     m3.metric("Total Net Profit", f"${total_profit:.2f}")
-    m4.metric("Overall ROI", f"{overall_roi:.1f}%")
+    m4.metric("Yard Cash ROI", f"{yard_cash_roi:.1f}%", help="ROI based purely on cash paid at the junkyard gate")
     
     st.markdown("### Itemized Breakdown")
     
     for row in rows:
         row_id, p_name, veh, l_price, y_cost, e_fees, f_fees, n_prof, r_val, status = row
+        item_yard_roi = (n_prof / y_cost * 100) if y_cost > 0 else 0.0
         
         with st.container():
             col_info, col_metrics, col_action = st.columns([2, 3, 1])
             with col_info:
-                st.markdown(f"**{p_name}**")
+                st.markdown(f"### {p_name}")
                 st.caption(f"🚗 {veh}")
             with col_metrics:
-                st.markdown(f"List: **${l_price:.2f}** | Yard: **${y_cost:.2f}**")
-                st.markdown(f"Fees (eBay: ${e_fees:.2f} | Fixed Overhead: ${f_fees:.2f})")
-                st.markdown(f"Profit: **<span style='color:green;'>${n_prof:.2f}</span>** ({r_val:.1f}% ROI)", unsafe_allow_html=True)
+                st.write(f"**List Price:** ${l_price:.2f} \vert{} **Yard Cost:**${y_cost:.2f}")
+                st.write(f"**eBay Fees:** ${e_fees:.2f} (13.25% + $0.30) | **Fixed Overhead:** ${f_fees:.2f}")
+                st.markdown(f"**Net Profit:** :green[**${n_prof:.2f}**] | **Yard ROI:** `{item_yard_roi:.1f}%` (All-In: `{r_val:.1f}%`)")
             with col_action:
                 if st.button("Delete", key=f"del_{row_id}"):
                     cursor.execute("DELETE FROM haul_list WHERE id = ?", (row_id,))
