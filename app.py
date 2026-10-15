@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 import streamlit as st
 
 st.set_page_config(
@@ -99,6 +100,21 @@ if rows:
     m2.metric("Total All-In Costs", f"${total_all_costs:.2f}")
     m3.metric("Total Net Profit", f"${total_profit:.2f}")
     m4.metric("Yard Cash ROI", f"{yard_cash_roi:.1f}%", help="ROI based purely on cash paid at the junkyard gate")
+    
+    st.markdown("---")
+    
+    # --- DOWNLOAD BUTTON FOR MOBILE ---
+    df_download = pd.DataFrame(rows, columns=["ID", "Part Name", "Vehicle", "List Price", "Yard Cost", "eBay Fees", "Fixed Fees", "Net Profit", "ROI (%)", "Status"])
+    df_export = df_download[["Part Name", "Vehicle", "List Price", "Yard Cost", "Net Profit", "ROI (%)", "Status"]]
+    csv_data = df_export.to_csv(index=False).encode('utf-8')
+    
+    st.download_button(
+        label="📥 Download Haul List as CSV",
+        data=csv_data,
+        file_name="weekend_haul_list.csv",
+        mime="text/csv",
+        type="primary"
+    )
     
     st.markdown("### Itemized Breakdown")
     
