@@ -112,8 +112,8 @@ if rows:
                 st.markdown(f"### {p_name}")
                 st.caption(f"🚗 {veh}")
             with col_metrics:
-                st.write(f"**List Price:** ${l_price:.2f} \vert{} **Yard Cost:**${y_cost:.2f}")
-                st.write(f"**eBay Fees:** ${e_fees:.2f} (13.25% + $0.30) | **Fixed Overhead:** ${f_fees:.2f}")
+                st.markdown(f"**List Price:** ${l_price:.2f} &nbsp;\vert{}&nbsp; **Yard Cost:**${y_cost:.2f}")
+                st.markdown(f"**eBay Fees:** ${e_fees:.2f} (13.25% + $0.30) &nbsp;|&nbsp; **Fixed Overhead:** ${f_fees:.2f}")
                 st.markdown(f"**Net Profit:** :green[**${n_prof:.2f}**] | **Yard ROI:** `{item_yard_roi:.1f}%` (All-In: `{r_val:.1f}%`)")
             with col_action:
                 if st.button("Delete", key=f"del_{row_id}"):
