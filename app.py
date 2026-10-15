@@ -65,7 +65,7 @@ with st.form("add_part_form", clear_on_submit=True):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (part_name, vehicle, list_price, yard_cost, ebay_fees, fixed_overhead, net_profit, roi, "To Grab"))
             conn.commit()
-            st.success(f"Added **{part_name}**! Net Profit: **${net_profit:.2f}**")
+            st.success(f"Added {part_name}! Net Profit: ${net_profit:.2f}")
             st.rerun()
         else:
             st.error("Please fill in the Part Name and Vehicle fields.")
@@ -110,11 +110,11 @@ if rows:
             col_info, col_metrics, col_action = st.columns([2, 3, 1])
             with col_info:
                 st.markdown(f"### {p_name}")
-                st.caption(f"🚗 {veh}")
+                st.caption(f"Vehicle: {veh}")
             with col_metrics:
-                st.markdown(f"**List Price:** ${l_price:.2f} &nbsp;\vert{}&nbsp; **Yard Cost:**${y_cost:.2f}")
-                st.markdown(f"**eBay Fees:** ${e_fees:.2f} (13.25% + $0.30) &nbsp;|&nbsp; **Fixed Overhead:** ${f_fees:.2f}")
-                st.markdown(f"**Net Profit:** :green[**${n_prof:.2f}**] | **Yard ROI:** `{item_yard_roi:.1f}%` (All-In: `{r_val:.1f}%`)")
+                st.write(f"List Price: ${l_price:.2f}  -  Yard Cost: ${y_cost:.2f}")
+                st.write(f"eBay Fees: ${e_fees:.2f} (13.25% + $0.30)  -  Fixed Overhead: ${f_fees:.2f}")
+                st.markdown(f"Net Profit: **${n_prof:.2f}**  -  Yard ROI: **{item_yard_roi:.1f}%** (All-In: {r_val:.1f}%)")
             with col_action:
                 if st.button("Delete", key=f"del_{row_id}"):
                     cursor.execute("DELETE FROM haul_list WHERE id = ?", (row_id,))
@@ -122,7 +122,7 @@ if rows:
                     st.rerun()
             st.markdown("---")
             
-    if st.button("🗑️ Clear Entire List", type="secondary"):
+    if st.button("Clear Entire List", type="secondary"):
         cursor.execute("DELETE FROM haul_list")
         conn.commit()
         st.rerun()
